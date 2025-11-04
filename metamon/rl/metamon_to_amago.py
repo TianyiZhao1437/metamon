@@ -452,14 +452,14 @@ class MetamonTstepEncoder(amago.nets.tstep_encoders.TstepEncoder):
     def emb_dim(self):
         return self.turn_embedding.output_dim
 
-    @torch.compile
-    def inner_forward(self, obs, rl2s, log_dict=None):
+    # @torch.compile
+    def inner_forward(self, text_tokens, numbers, rl2s):
         if self.training and self.token_mask_aug:
-            obs["text_tokens"] = unknown_token_mask(obs["text_tokens"])
+            text_tokens = unknown_token_mask(text_tokens)
         extras = F.leaky_relu(self.extra_emb(symlog(rl2s)))
-        numerical = torch.cat((obs["numbers"], extras), dim=-1)
+        numerical = torch.cat((numbers, extras), dim=-1)
         turn_emb = self.turn_embedding(
-            token_inputs=obs["text_tokens"], numerical_inputs=numerical
+            token_inputs=text_tokens, numerical_inputs=numerical
         )
         return turn_emb
 
@@ -510,7 +510,7 @@ class MetamonPerceiverTstepEncoder(amago.nets.tstep_encoders.TstepEncoder):
     def emb_dim(self):
         return self.turn_embedding.output_dim
 
-    @torch.compile
+    # @torch.compile
     def inner_forward(self, obs, rl2s, log_dict=None):
         if self.training and self.token_mask_aug:
             obs["text_tokens"] = unknown_token_mask(obs["text_tokens"])
