@@ -279,15 +279,14 @@ class MetamonMaskedActor(amago.nets.actor_critic.Actor):
     def actor_network_forward(
         self,
         state: torch.Tensor,
-        log_dict: Optional[dict[str, Any]] = None,
-        straight_from_obs: Optional[dict[str, torch.Tensor]] = None,
+        illegal_actions: torch.Tensor,
     ):
         dist_params = super().actor_network_forward(
-            state, log_dict=log_dict, straight_from_obs=straight_from_obs
+            state, illegal_actions,
         )
         if self.mask_illegal_actions:
             Batch, Len, Gammas, N = dist_params.shape
-            mask = straight_from_obs["illegal_actions"]
+            mask = illegal_actions
             no_options = mask.all(dim=-1, keepdim=True)
             # TODO: having no legal options should be considered a problem
             # with action masking / action space, but seems to happen
