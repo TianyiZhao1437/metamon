@@ -402,6 +402,7 @@ def unknown_token_mask(tokens, skip_prob: float = 0.2, batch_max_prob: float = 0
         batch_mask * batch_thresh
     )  # 0 if batch index isn't masked, % to mask otherwise
     mask = torch.rand(tokens.shape) < thresh.view(-1, 1, 1)
+    mask = mask.to(torch.int32)
     tokens[mask.to(dev)] = UNKNOWN_TOKEN
     return tokens.to(dev)
 
@@ -510,7 +511,7 @@ class MetamonPerceiverTstepEncoder(amago.nets.tstep_encoders.TstepEncoder):
         return self.turn_embedding.output_dim
 
     # @torch.compile
-    def inner_forward(self, obs, rl2s, log_dict=None):
+    def inner_forward(self, obs, rl2s):
         if self.training and self.token_mask_aug:
             obs["text_tokens"] = unknown_token_mask(obs["text_tokens"])
         extras = F.leaky_relu(self.extra_emb(symlog(rl2s)))
